@@ -53,7 +53,7 @@ data = yaml.load(data_str)
 
 fmt = """\
 <tr>
-    <td>{name}</td>
+    <td><a href="{base}">{name}</a></td>
     <td>{tag_img}</td>
     <td>{pypi_img}</td>
 </tr>
@@ -61,23 +61,22 @@ fmt = """\
 io = StringIO()
 
 for name, info in data:
+    # normalize data
     info = info or {}
+    base = info.get('base', "https://github.com/packagecontrol/" + name) or ""
+    pypi_name = info.get('pypi', False)
+    if pypi_name is True:
+        pypi_name = name
 
-    base = info.get('base', False)
-    if not base or base.startswith("https://github"):
-        if not base:
-            org, repo = "packagecontrol", name
-        else:
-            _, org, repo = info['base'].rsplit('/', 2)
+    if base.startswith("https://github.com/"):
+        # only supported for github, not bitbucket
+        _, org, repo = base.rsplit('/', 2)
         tag_img = '<img src="https://img.shields.io/github/tag/{org}/{repo}.svg" />'.format(org=org, repo=repo)
     else:
         tag_img = ""
 
-    pypi_name = info.get('pypi', False)
     if pypi_name:
-        if pypi_name is True:
-            pypi_name = name
-        pypi_img = '<img src="https://img.shields.io/pypi/v/{name}.svg" />'.format(name=name)
+        pypi_img = '<img src="https://img.shields.io/pypi/v/{pypi_name}.svg" />'.format(pypi_name=pypi_name)
     else:
         pypi_img = ""
 
