@@ -1,8 +1,101 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <title>Dependencies on Package Control</title>
 </head>
+<style type="text/css">
+  body {max-width: 40em; margin: auto;}
+  img {float: right; margin: 0 20px; }
+  #deps p {margin-left: 10px}
+  hr {border: 0 none; background: #cccccc; height: 1px;}
+</style>
+<script type="text/javascript">
+  function getXmlHttp(){
+    var xmlhttp;
+    try {
+      xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+    } catch (e) {
+      try {
+        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+      } catch (E) {
+        xmlhttp = false;
+      }
+    }
+    if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
+      xmlhttp = new XMLHttpRequest();
+    }
+    return xmlhttp;
+  }
+
+  function appendDep(dep, target) {
+    var child = document.createElement('p');
+    var link = document.createElement('a');
+    var url = '';
+    if (dep.issues){
+      url = dep.issues.replace('/issues', '');
+    } else {
+      if (dep.releases){
+        url = dep.releases[0].base;
+      } else {
+        alert(dep);
+      }
+    }
+    link.href = url;
+    link.appendChild(document.createTextNode(dep.name + '\t'));
+    child.appendChild(link);
+
+    if (url.lastIndexOf('https://github.com/', 0) === 0) {
+      var gh_shield = document.createElement('img');
+      gh_shield.src = 'https://img.shields.io/github/tag/' + url.substr(19) + '.svg';
+      child.appendChild(gh_shield);
+    }
+    var pp_shield = document.createElement('img');
+    pp_shield.src = 'https://img.shields.io/pypi/v/' + dep.name.replace('python-', '') + '.svg';
+    child.appendChild(pp_shield);
+
+    child.appendChild(document.createElement('br'));
+    child.appendChild(document.createTextNode(dep.description));
+    child.appendChild(document.createElement('br'));
+
+    if (dep.releases[0].sublime_text) {
+      if ('*' != dep.releases[0].sublime_text) {
+        child.appendChild(document.createElement('br'));
+        child.appendChild(document.createTextNode('ST version is restricted to ' + dep.releases[0].sublime_text));
+      }
+    }
+    if (dep.releases[0].platforms) {
+      if ('*' != dep.releases[0].platforms[0]) {
+        child.appendChild(document.createElement('br'));
+        child.appendChild(document.createTextNode('Platform restriction(s): ' + dep.releases[0].platforms));
+      }
+    }
+
+    target.appendChild(child);
+    target.appendChild(document.createElement('hr'));
+  }
+
+  var xmlhttp = getXmlHttp()
+  xmlhttp.open('GET', 'https://raw.githubusercontent.com/wbond/package_control_channel/master/repository/dependencies.json', true);
+  xmlhttp.onreadystatechange = function() {
+    if (xmlhttp.readyState == 4) {
+      if (xmlhttp.status == 200) {
+        var json = JSON.parse(xmlhttp.responseText);
+        var target = document.getElementById("deps")
+        target.appendChild(document.createElement('hr'));
+        var deps = json.dependencies;
+        for (i = 0; i < deps.length; i++) {
+          appendDep(deps[i], target);
+        }
+      } else {
+        alert('GitHub did not respond! :(');
+        return null
+      }
+    }
+  };
+
+  xmlhttp.send(null);
+</script>
 <body>
     <h1>Beautiful WIP Page For List Of Dependencies</h1>
 
@@ -20,104 +113,6 @@
         <a href="https://github.com/wbond/package_control_channel/blob/master/repository/dependencies.json">Link to current <code>dependencies.json</code> file.</a>
     </p>
 
-    <table>
-        <tr>
-            <th>dep name</th>
-            <th>version</th>
-            <th>version on pypi</th>
-        </tr>
-        <!-- -->
-        <tr>
-            <td><a href="https://github.com/douglas-vaz/arrow">arrow</a></td>
-            <td><img src="https://img.shields.io/github/tag/douglas-vaz/arrow.svg" /></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><a href="https://github.com/codexns/sublime-bz2">bz2</a></td>
-            <td><img src="https://img.shields.io/github/tag/codexns/sublime-bz2.svg" /></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><a href="https://bitbucket.org/teddy_beer_maniac/sublime-text-dependency-jinja2">jinja2</a></td>
-            <td></td>
-            <td><img src="https://img.shields.io/pypi/v/jinja2.svg" /></td>
-        </tr>
-        <tr>
-            <td><a href="https://bitbucket.org/teddy_beer_maniac/sublime-text-dependency-markupsafe">markupsafe</a></td>
-            <td></td>
-            <td><img src="https://img.shields.io/pypi/v/MarkupSafe.svg" /></td>
-        </tr>
-        <tr>
-            <td><a href="https://github.com/packagecontrol/oauthlib">oauthlib</a></td>
-            <td><img src="https://img.shields.io/github/tag/packagecontrol/oauthlib.svg" /></td>
-            <td><img src="https://img.shields.io/pypi/v/oauthlib.svg" /></td>
-        </tr>
-        <tr>
-            <td><a href="https://github.com/packagecontrol/ordereddict">ordereddict</a></td>
-            <td><img src="https://img.shields.io/github/tag/packagecontrol/ordereddict.svg" /></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><a href="https://github.com/jlegewie/sublime-paramiko">paramiko</a></td>
-            <td><img src="https://img.shields.io/github/tag/jlegewie/sublime-paramiko.svg" /></td>
-            <td><img src="https://img.shields.io/pypi/v/paramiko.svg" /></td>
-        </tr>
-        <tr>
-            <td><a href="https://github.com/jlegewie/sublime-PyCrypto">PyCrypto</a></td>
-            <td><img src="https://img.shields.io/github/tag/jlegewie/sublime-PyCrypto.svg" /></td>
-            <td><img src="https://img.shields.io/pypi/v/pycrypto.svg" /></td>
-        </tr>
-        <tr>
-            <td><a href="https://github.com/packagecontrol/pygments">pygments</a></td>
-            <td><img src="https://img.shields.io/github/tag/packagecontrol/pygments.svg" /></td>
-            <td><img src="https://img.shields.io/pypi/v/pygments.svg" /></td>
-        </tr>
-        <tr>
-            <td><a href="https://github.com/packagecontrol/pytz">pytz</a></td>
-            <td><img src="https://img.shields.io/github/tag/packagecontrol/pytz.svg" /></td>
-            <td><img src="https://img.shields.io/pypi/v/pytz.svg" /></td>
-        </tr>
-        <tr>
-            <td><a href="https://github.com/packagecontrol/pyyaml">pyyaml</a></td>
-            <td><img src="https://img.shields.io/github/tag/packagecontrol/pyyaml.svg" /></td>
-            <td><img src="https://img.shields.io/pypi/v/pyyaml.svg" /></td>
-        </tr>
-        <tr>
-            <td><a href="https://github.com/packagecontrol/requests">requests</a></td>
-            <td><img src="https://img.shields.io/github/tag/packagecontrol/requests.svg" /></td>
-            <td><img src="https://img.shields.io/pypi/v/requests.svg" /></td>
-        </tr>
-        <tr>
-            <td><a href="https://github.com/packagecontrol/requests-oauthlib">requests-oauthlib</a></td>
-            <td><img src="https://img.shields.io/github/tag/packagecontrol/requests-oauthlib.svg" /></td>
-            <td><img src="https://img.shields.io/pypi/v/requests-oauthlib.svg" /></td>
-        </tr>
-        <tr>
-            <td><a href="https://github.com/codexns/sublime-select-windows">select-windows</a></td>
-            <td><img src="https://img.shields.io/github/tag/codexns/sublime-select-windows.svg" /></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><a href="">ssl-linux</a></td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><a href="">ssl-windows</a></td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><a href="https://github.com/huot25/StyledPopup">StyledPopup</a></td>
-            <td><img src="https://img.shields.io/github/tag/huot25/StyledPopup.svg" /></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td><a href="https://github.com/packagecontrol/tabulate">tabulate</a></td>
-            <td><img src="https://img.shields.io/github/tag/packagecontrol/tabulate.svg" /></td>
-            <td><img src="https://img.shields.io/pypi/v/tabulate.svg" /></td>
-        </tr>
-
-    </table>
+    <div id="deps"></div>
 </body>
 </html>
